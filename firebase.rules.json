@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "payment_logs": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}

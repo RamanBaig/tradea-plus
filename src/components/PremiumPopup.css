@@ -1,0 +1,69 @@
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease-in-out;
+  z-index: 9999; /* Add this line to ensure popup is above everything */
+}
+
+.premium-popup {
+  background: #1a1a1a;
+  border-radius: 10px;
+  padding: 2rem;
+  box-shadow: 0 0 20px rgba(0, 157, 255, 0.5);
+  max-width: 400px;
+  width: 90%;
+}
+
+.popup-content h2 {
+  color: white;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.popup-content p {
+  color: #ccc;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.popup-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.upgrade-button, .cancel-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.upgrade-button {
+  background: #009dff;
+  color: white;
+}
+
+.cancel-button {
+  background: transparent;
+  border: 1px solid #666;
+  color: #666;
+}
+
+.upgrade-button:hover, .cancel-button:hover {
+  transform: scale(1.05);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
