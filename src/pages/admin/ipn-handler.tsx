@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getPaymentLogs, getAllPaymentData } from '../../services/firebase';
+import { getPaymentLogs, getAllPaymentData, addPaymentLog } from '../../services/firebase';
 import type { PaymentLog } from '../../services/firebase';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
@@ -34,58 +34,38 @@ export const IpnHandlerPage = () => {
         updated_at: new Date().toISOString()
       };
       
-      // Make an actual POST request to our API webhook endpoint
-      const response = await fetch('/api/ipn/nowpayments', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(testData),
-      });
+      // Use a direct mock approach instead of API call
+      // This simulates receiving webhook data without making an actual API call
+      console.log('Simulating webhook with test data:', testData);
       
-      const result = await response.json();
+      // Directly call the addPaymentLog function to add test data to Firestore
+      const paymentId = testData.payment_id;
+      await addPaymentLog(
+        `TEST: Payment ${paymentId} status: ${testData.payment_status}, Amount: ${testData.price_amount} ${testData.price_currency}`,
+        testData.order_id,
+        undefined,
+        testData
+      );
       
-      if (!response.ok) {
-        throw new Error(`API error: ${result.message || response.statusText}`);
-      }
+      // Add a second log with full data
+      await addPaymentLog(
+        `TEST: Full payment data: ${JSON.stringify(testData)}`,
+        testData.order_id,
+        undefined,
+        testData
+      );
       
-      setLogs(prev => [
-        `TEST: Sent webhook test to API endpoint. Payment ID: ${testData.payment_id}`,
-        `TEST: API Response: ${JSON.stringify(result)}`,
-        ...prev
-      ]);
+      // Display success message
+      setLogs(prev => [`TEST: Created test IPN data in Firestore. Payment ID: ${paymentId}`, ...prev]);
       
       // Refresh payment data to show the test data
       await refreshPaymentLogs();
       
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      setError(`Failed to send test webhook: ${errorMessage}`);
+      setError(`Failed to create test data: ${errorMessage}`);
       console.error('Test webhook error:', error);
     }
-  };
-
-  // Add this new function to explain IPN to the user
-  const getWebhookUrl = () => {
-    // Use environment variables or fallback to dynamic origin
-    // This ensures your webhook URL is correct in all environments
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || window.location.origin;
-    return `${baseUrl}/api/ipn/nowpayments`;
-  };
-
-  // Add this new function to provide deployment instructions
-  const renderInstructions = () => {
-    return (
-      <div className="mt-4 text-sm text-gray-300">
-        <h3 className="font-medium mb-1">Deployment Instructions:</h3>
-        <ol className="list-decimal pl-5 space-y-1">
-          <li>Deploy this app to Render, Vercel, or Netlify</li>
-          <li>Copy the webhook URL shown above</li>
-          <li>Configure this URL in your NOWPayments dashboard</li>
-          <li>No local setup required - webhooks will be received automatically</li>
-        </ol>
-      </div>
-    );
   };
 
   // Function to clear all test data from Firestore
@@ -192,31 +172,6 @@ export const IpnHandlerPage = () => {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      
-      {/* Add webhook URL information */}
-      <Card className="bg-blue-900/30 mb-6">
-        <CardContent className="pt-6">
-          <h2 className="text-lg font-semibold mb-2">Webhook Setup</h2>
-          <p className="mb-2">Your IPN Callback URL (configure this in NOWPayments):</p>
-          <div className="bg-gray-900 p-3 rounded flex justify-between items-center">
-            <code className="text-green-400">{getWebhookUrl()}</code>
-            <Button 
-              onClick={() => {
-                navigator.clipboard.writeText(getWebhookUrl());
-                setLogs(prev => ["Webhook URL copied to clipboard", ...prev]);
-              }}
-              className="ml-2"
-            >
-              Copy
-            </Button>
-          </div>
-          <p className="mt-4 text-sm text-gray-300">
-            Webhooks work by NOWPayments sending a POST request to your server when payment status changes.
-            Your app needs to be deployed to a public server (like Render) for the webhooks to work.
-          </p>
-          {renderInstructions()}
-        </CardContent>
-      </Card>
       
       {/* Control buttons */}
       <div className="mb-6 gap-2">
